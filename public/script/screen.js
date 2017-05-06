@@ -16,26 +16,38 @@ var mytat = new tiltandtap({
     tiltRight : {callback:next_image},
     
 });
-
+var p=false;
+function cancel_protect()
+{
+	p=false;
+}
 function prev_image()
 {
+	if (p==true)
+	{
+		return;
+	}
     var socket = io();
     socket.emit('next prev image', [-1,devicename]);
+    p=true;
+    setTimeout("cancel_protect()",1000); 
 }
 function next_image() {
-    //if (now_image<6) now_image=now_image+1;
-    //showImage(now_image);
+	if (p==true)
+	{
+		return;
+	}
     var socket = io();
     socket.emit('next prev image', [1,devicename]);
+    p=true;
+    setTimeout("cancel_protect()",1000); 
     
 }
 
 $(function () {
         devicename = getQueryParams().name;
         var socket = io();
-        //alert(devicename);
         socket.on(devicename, function(msg){
-           // alert("msg");
             if (msg==-1) 
             {
                 clearImage();
@@ -46,6 +58,35 @@ $(function () {
             }
            
         });
+        if (window.DeviceOrientationEvent)
+        {
+        	window.addEventListener('deviceorientation',function(eventData)
+        	{
+        		var beta_angle = eventData.beta;
+        		
+        		var img = document.querySelector('#image');
+        		if (beta_angle<15)
+        		{
+        			img.setAttribute("width", "100%");
+        		}
+        		else if (beta_angle<40)
+        		{
+        			img.setAttribute("width", "80%");
+        		}
+        		else if (beta_angle<75)
+        		{
+        			img.setAttribute("width", "60%");
+        		}
+        		else
+        			img.setAttribute("width", "40%");
+
+
+        		
+        	})
+        }
+
+
+
         
 });
 
