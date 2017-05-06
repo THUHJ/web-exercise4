@@ -1,6 +1,6 @@
 var devicename; // the name of this screen and specified in the URL
 var imageCount = 7; // the maximum number of images available
-
+var now_image = -1;
 document.addEventListener("DOMContentLoaded", function(event) {
     devicename = getQueryParams().name;
     if (devicename) {
@@ -11,6 +11,24 @@ document.addEventListener("DOMContentLoaded", function(event) {
     connectToServer();
 });
 
+var mytat = new tiltandtap({
+    tiltLeft :  {callback:prev_image},
+    tiltRight : {callback:next_image},
+    
+});
+
+function prev_image()
+{
+    var socket = io();
+    socket.emit('next prev image', [-1,devicename]);
+}
+function next_image() {
+    //if (now_image<6) now_image=now_image+1;
+    //showImage(now_image);
+    var socket = io();
+    socket.emit('next prev image', [1,devicename]);
+    
+}
 
 $(function () {
         devicename = getQueryParams().name;
@@ -32,6 +50,7 @@ $(function () {
 });
 
 function showImage (index){
+    now_image = index;
     var img = document.querySelector('#image');
     var msg = document.querySelector('#msg');
     if (index >= 0 && index <= imageCount){

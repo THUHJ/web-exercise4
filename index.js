@@ -14,7 +14,7 @@ app.get('/', function(req, res){
 
 
 
-var myMap = new Map();
+//var myMap = new Map();
 var namelist = [];
 
 io.on('connection', function(socket){
@@ -22,29 +22,29 @@ io.on('connection', function(socket){
   socket.on('login', function(msg){
   	socket.username = msg;
   	namelist.push(msg);
-  	myMap[msg] = socket;
+  	//myMap[msg] = socket;
     io.emit('update', namelist);
     
   });
 
   socket.on("change img", function(msg){
-  	//console.log("kk"+msg);
     io.emit(msg[0], msg[1]);
     
   });
 
   socket.on('remote', function(msg){
     io.emit('update', namelist);
-    
   });
- 
+
+  socket.on('next prev image', function(msg){
+    io.emit('next prev image', msg);
+  });
 
   socket.on('disconnect', function(){
-  	//myMap[msg] = null;
   	if (socket.username==null) return;
   	var index = namelist.indexOf(socket.username);
-	namelist.splice(index, 1);
-	io.emit('update', namelist);
+	  namelist.splice(index, 1);
+	  io.emit('update', namelist);
     console.log(socket.username+' user disconnected');
   });
 

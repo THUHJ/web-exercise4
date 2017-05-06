@@ -67,14 +67,14 @@ function changestate(name)
         assignimg();
         
     }
+    //alert("change"+" "+name+" "+screenstate[name])
 
 }
 
 $(function () {
         var socket = io();
         
-        socket.on('update', function(namelist){
-            
+        socket.on('update', function(namelist){ 
             screenlist = namelist;
             $('#menu').html("");
 
@@ -96,6 +96,22 @@ $(function () {
                 var mybutton = "<button id="+name+" onclick='changestate(\""+name+"\")'>"+screenstate[name]+"</button>"
                 $('#menu').append("<li>"+name+mybutton+"</li>");
             }
+        });
+
+
+        socket.on('next prev image', function(msg){
+            next_prev = msg[0];
+            name = msg[1];
+            //alert(next_prev+" "+name+" "+screenstate[name])
+            if (screenstate[name]=="Disconnect")
+            {
+                currentImage += next_prev;
+                if (currentImage==-1) currentImage=0;
+                if (currentImage==7) currentImage=6;
+                //alert(currentImage)
+                showImage(currentImage)
+            }
+            
         });
 });
 
