@@ -10,40 +10,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
     connectToServer();
 });
-
-var mytat = new tiltandtap({
-    tiltLeft :  {callback:prev_image},
-    tiltRight : {callback:next_image},
-    
-});
-var p=false;
-function cancel_protect()
-{
-	p=false;
-}
-function prev_image()
-{
-	if (p==true)
-	{
-		return;
-	}
-    var socket = io();
-    socket.emit('next prev image', [-1,devicename]);
-    p=true;
-    setTimeout("cancel_protect()",1000); 
-}
-function next_image() {
-	if (p==true)
-	{
-		return;
-	}
-    var socket = io();
-    socket.emit('next prev image', [1,devicename]);
-    p=true;
-    setTimeout("cancel_protect()",1000); 
-    
-}
-
+ 
 $(function () {
         devicename = getQueryParams().name;
         var socket = io();
@@ -54,42 +21,25 @@ $(function () {
             }
             else
             {
-                showImage(msg);
+
+                if (msg[0]=='img')
+                {
+                    showImage(msg[1]);
+                }
+                else
+                {
+                    changesize(msg[1])
+                }
             }
            
-        });
-        if (window.DeviceOrientationEvent)
-        {
-        	window.addEventListener('deviceorientation',function(eventData)
-        	{
-        		var beta_angle = eventData.beta;
-        		
-        		var img = document.querySelector('#image');
-        		if (beta_angle<15)
-        		{
-        			img.setAttribute("width", "100%");
-        		}
-        		else if (beta_angle<40)
-        		{
-        			img.setAttribute("width", "80%");
-        		}
-        		else if (beta_angle<75)
-        		{
-        			img.setAttribute("width", "60%");
-        		}
-        		else
-        			img.setAttribute("width", "40%");
-
-
-        		
-        	})
-        }
-
-
-
-        
+        });    
 });
-
+function changesize(size)
+{
+    
+    var img = document.querySelector('#image');
+    img.setAttribute("width", size);
+}
 function showImage (index){
     now_image = index;
     var img = document.querySelector('#image');

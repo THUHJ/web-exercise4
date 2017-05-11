@@ -28,8 +28,10 @@ io.on('connection', function(socket){
   });
 
   socket.on("change img", function(msg){
-    io.emit(msg[0], msg[1]);
-    
+    io.emit(msg[0], ['img',msg[1]]);
+  });
+  socket.on("change size", function(msg){
+    io.emit(msg[0], ['size',msg[1]]);
   });
 
   socket.on('remote', function(msg){

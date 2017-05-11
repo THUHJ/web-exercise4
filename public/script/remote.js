@@ -5,6 +5,44 @@ var screenstate = new Map();
 var screenlist =[];
 var currentImage =0;
 
+
+
+var mytat = new tiltandtap({
+    tiltLeft :  {callback:prev_image},
+    tiltRight : {callback:next_image},
+    
+});
+var p=false;
+function cancel_protect()
+{
+    p=false;
+}
+function prev_image()
+{
+    //alert("Asd");
+    if (p==true)
+    {
+        return;
+    }
+    if (currentImage!=0) currentImage--;
+    showImage(currentImage);
+
+    p=true;
+    setTimeout("cancel_protect()",500); 
+}
+function next_image() {
+    if (p==true)
+    {
+        return;
+    }
+    if (currentImage!=6) currentImage++;
+    showImage(currentImage);
+    p=true;
+    setTimeout("cancel_protect()",500); 
+    
+}
+
+
 function assignimg()
 {
     var imgid = currentImage;
@@ -70,7 +108,12 @@ function changestate(name)
     //alert("change"+" "+name+" "+screenstate[name])
 
 }
-
+var p2=false;
+function cancel_protect2()
+{
+   
+    p2=false;
+}
 $(function () {
         var socket = io();
         
@@ -98,21 +141,64 @@ $(function () {
             }
         });
 
-
-        socket.on('next prev image', function(msg){
-            next_prev = msg[0];
-            name = msg[1];
-            //alert(next_prev+" "+name+" "+screenstate[name])
-            if (screenstate[name]=="Disconnect")
+        if (window.DeviceOrientationEvent)
+        {
+            window.addEventListener('deviceorientation',function(eventData)
             {
-                currentImage += next_prev;
-                if (currentImage==-1) currentImage=0;
-                if (currentImage==7) currentImage=6;
-                //alert(currentImage)
-                showImage(currentImage)
-            }
-            
-        });
+                if (p2) return;
+
+                var beta_angle = eventData.beta;
+               
+                var size = "100%";
+                if (beta_angle<15)
+                {
+                    size = "100%";
+                }
+                else if (beta_angle<40)
+                {
+                    size = "80%";
+                }
+                else if (beta_angle<75)
+                {
+                    size = "60%";
+                }
+                else
+                    size = "40%";
+                var socket = io();
+                socket.emit("change img", [name,-1]);
+                for (i in screenlist)
+                {
+                   
+                    var name = screenlist[i];
+                    if (screenstate[name]=="Disconnect")
+                    {
+                        var socket = io();
+                        socket.emit("change size", [name,size]);                       
+                    }
+                    
+                }
+                p2=true;
+                setTimeout("cancel_protect2()",100); 
+
+
+                
+            })
+        }
+
+
+        // socket.on('next prev image', function(msg){
+        //     next_prev = msg[0];
+        //     name = msg[1];
+        //     //alert(next_prev+" "+name+" "+screenstate[name])
+        //     if (screenstate[name]=="Disconnect")
+        //     {
+        //         currentImage += next_prev;
+        //         if (currentImage==-1) currentImage=0;
+        //         if (currentImage==7) currentImage=6;
+        //         //alert(currentImage)
+        //         showImage(currentImage)
+        //     } 
+        //});
 });
 
 
