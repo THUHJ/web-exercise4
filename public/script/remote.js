@@ -4,14 +4,15 @@ var imageCount = 7; // the maximum number of images available
 var screenstate = new Map();
 var screenlist =[];
 var currentImage =0;
+var socket = io()
 
 
 
-var mytat = new tiltandtap({
-    tiltLeft :  {callback:prev_image},
-    tiltRight : {callback:next_image},
+// var mytat = new tiltandtap({
+//     tiltLeft :  {callback:prev_image},
+//     tiltRight : {callback:next_image},
     
-});
+// });
 var p=false;
 function cancel_protect()
 {
@@ -19,7 +20,6 @@ function cancel_protect()
 }
 function prev_image()
 {
-    //alert("Asd");
     if (p==true)
     {
         return;
@@ -45,6 +45,7 @@ function next_image() {
 
 function assignimg()
 {
+
     var imgid = currentImage;
     for (i in screenlist)
     {
@@ -52,15 +53,15 @@ function assignimg()
         var name = screenlist[i];
         if (screenstate[name]=="Disconnect")
         {
-            var socket = io();
-           //alert(name+" "+imgid);
+            //var socket = io();
+            //alert(name+" "+imgid);
             socket.emit("change img", [name,imgid]);
             if (imgid<6) imgid=imgid+1;
         }
         
     }
 }
-
+/*
 $(window).bind('beforeunload', function(){  
     
     for (i in screenlist)
@@ -78,19 +79,36 @@ $(window).bind('beforeunload', function(){
     }
      //return false; 
 });
+$(window).unload( function () 
+{  
 
+for (i in screenlist)
+    {
+       
+        var name = screenlist[i];
+        if (screenstate[name]=="Disconnect")
+        {
+            var socket = io();
+           //alert(name+" "+imgid);
+            socket.emit("change img", [name,-1]);
+            
+        }
+        
+    }
+
+} );
+*/
 
 function changestate(name)
 {
-
-
     var butt = $('#'+name);
-
-
     var state = butt.text();
     if (state=="Connect")
     {
         screenstate[name]="Disconnect";
+
+
+
         butt.text("Disconnect");
         assignimg();
     }
@@ -100,7 +118,8 @@ function changestate(name)
         butt.text("Connect");
         
         
-        var socket = io();
+        //var socket = io();
+        //alert("change state")
         socket.emit("change img", [name,-1]);
         assignimg();
         
@@ -114,8 +133,9 @@ function cancel_protect2()
    
     p2=false;
 }
+var nowsize = ""
 $(function () {
-        var socket = io();
+        //var socket = io();
         
         socket.on('update', function(namelist){ 
             screenlist = namelist;
@@ -125,7 +145,7 @@ $(function () {
             for (i in namelist)
             {
                 var name = namelist[i];
-                if (screenstate[name]==null)
+                if (screenstate[name]==undefined)
                 {
                     newmap[name]="Connect";
                 }
@@ -139,6 +159,7 @@ $(function () {
                 var mybutton = "<button id="+name+" onclick='changestate(\""+name+"\")'>"+screenstate[name]+"</button>"
                 $('#menu').append("<li>"+name+mybutton+"</li>");
             }
+            assignimg();
         });
 
         if (window.DeviceOrientationEvent)
@@ -164,26 +185,38 @@ $(function () {
                 }
                 else
                     size = "40%";
-                var socket = io();
-                socket.emit("change img", [name,-1]);
-                for (i in screenlist)
+                if (size!=nowsize)
                 {
-                   
-                    var name = screenlist[i];
-                    if (screenstate[name]=="Disconnect")
+                    nowsize = size;
+                    //var socket = io();
+                    //socket.emit("change img", [name,-1]);
+                    for (i in screenlist)
                     {
-                        var socket = io();
-                        socket.emit("change size", [name,size]);                       
+                       
+                        var name = screenlist[i];
+                        if (screenstate[name]=="Disconnect")
+                        {
+                            //var socket = io();
+                            socket.emit("change size", [name,size]);                       
+                        }
+                        
                     }
-                    
+
+                    p2=true;
+                    setTimeout("cancel_protect2()",200); 
                 }
-                p2=true;
-                setTimeout("cancel_protect2()",100); 
 
 
                 
             })
         }
+
+        if (window.DeviceMotionEvent) {
+            window.addEventListener('devicemotion', deviceMotionHandler, false);
+        } else {
+            document.getElementById("menu").innerHTML = "Not supported."
+        };
+
 
 
         // socket.on('next prev image', function(msg){
@@ -200,6 +233,17 @@ $(function () {
         //     } 
         //});
 });
+
+
+
+
+function deviceMotionHandler(eventData) {
+    var acceleration = eventData.acceleration;
+    var xx=acceleration.x;
+    if (xx>5) prev_image();
+    if (xx<-3) next_image();
+     
+}
 
 
 function showImage (index){
@@ -245,7 +289,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 });
 
 function connectToServer(){
-    var socket = io();
+    
     socket.emit('remote', "all");
     // TODO connect to the socket.io server
 }

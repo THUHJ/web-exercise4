@@ -7,33 +7,9 @@ document.addEventListener("DOMContentLoaded", function(event) {
         var text = document.querySelector('#name');
         text.textContent = devicename;
     }
-
     connectToServer();
 });
  
-$(function () {
-        devicename = getQueryParams().name;
-        var socket = io();
-        socket.on(devicename, function(msg){
-            if (msg==-1) 
-            {
-                clearImage();
-            }
-            else
-            {
-
-                if (msg[0]=='img')
-                {
-                    showImage(msg[1]);
-                }
-                else
-                {
-                    changesize(msg[1])
-                }
-            }
-           
-        });    
-});
 function changesize(size)
 {
     
@@ -68,15 +44,29 @@ function getQueryParams() {
         params[decodeURIComponent(tokens[1])]
             = decodeURIComponent(tokens[2]);
     }
-
     return params;
 }
 
-
 function connectToServer(){
-     var socket = io();
-     devicename = getQueryParams().name;
-     if (devicename)
+    var socket = io();
+    devicename = getQueryParams().name;
+    if (devicename)
+    {
         socket.emit('login', devicename);
-    // TODO connect to the socket.io server
+    }
+    socket.on(devicename, function(msg){
+        if (msg[0]=='img')
+        {
+            if (msg[1]==-1) 
+            {
+                clearImage();
+            }
+    
+            showImage(msg[1]);
+        }
+        else
+        {
+            changesize(msg[1])
+        }
+    });    
 }
