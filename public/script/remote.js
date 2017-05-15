@@ -24,10 +24,9 @@ function prev_image()
     {
         return;
     }
+    p=true;
     if (currentImage!=0) currentImage--;
     showImage(currentImage);
-
-    p=true;
     setTimeout("cancel_protect()",500); 
 }
 function next_image() {
@@ -35,11 +34,10 @@ function next_image() {
     {
         return;
     }
+    p=true;
     if (currentImage!=6) currentImage++;
     showImage(currentImage);
-    p=true;
     setTimeout("cancel_protect()",500); 
-    
 }
 
 
@@ -134,6 +132,10 @@ function cancel_protect2()
     p2=false;
 }
 var nowsize = ""
+var gammas = [];
+var span = 8;
+var gmax = -1000;
+var gmin = 1000;
 $(function () {
         //var socket = io();
         
@@ -206,7 +208,33 @@ $(function () {
                     setTimeout("cancel_protect2()",200); 
                 }
 
+                // gamma
+                var g = eventData.gamma;
+                gammas.push(g);
+                // $("#menu").html(g+" k"+gammas);
+                if(gammas.length > span){
+                    gammas.shift();
+                    var diff = gammas[0] - gammas[span-1];
+                    
+                    if(diff>30 && gammas[0]<10)
+                        prev_image();
+                    if(diff<-30 && gammas[0]>-10) 
+                        next_image();
 
+                    if(diff>30 || diff <-30){
+                        // $("#menu").html(gammas[0] + " "+diff);
+                        gammas.length = 0;
+                    }
+                }
+    
+
+    /*if(zz>2)
+        $("#menu").html(xx + " " +zz);
+    if(zz<-2)
+        $("#menu").html(xx + " " + zz);*/
+
+    if (xx>5) prev_image();
+    if (xx<-3) next_image();
                 
             })
         }
@@ -234,14 +262,17 @@ $(function () {
         //});
 });
 
-
-
-
 function deviceMotionHandler(eventData) {
     var acceleration = eventData.acceleration;
     var xx=acceleration.x;
-    if (xx>5) prev_image();
-    if (xx<-3) next_image();
+    var zz=acceleration.z;
+    /*if(zz>2)
+        $("#menu").html(xx + " " +zz);
+    if(zz<-2)
+        $("#menu").html(xx + " " + zz);*/
+
+    // if (xx>5) prev_image();
+    // if (xx<-3) next_image();
      
 }
 
