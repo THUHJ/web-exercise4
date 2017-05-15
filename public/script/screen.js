@@ -48,6 +48,7 @@ function getQueryParams() {
 }
 
 function connectToServer(){
+    //alert("woc")
     var socket = io();
     devicename = getQueryParams().name;
     if (devicename)
