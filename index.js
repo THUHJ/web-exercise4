@@ -26,6 +26,7 @@ io.on('connection', function(socket){
   	socket.username = msg;
 
      var index = namelist.indexOf(msg);
+     console.log('index:'+index);
      if (index==-1)
   	   namelist.push(msg);
 
@@ -98,10 +99,13 @@ io.on('connection', function(socket){
     }
     if (socket.username!=undefined)
     {
+      console.log('before namelist:'+namelist);
     	var index = namelist.indexOf(socket.username);
-  	  namelist.splice(index, 1);
+      if (index!=-1)
+  	     namelist.splice(index, 1);
   	  io.emit('update', namelist);
       console.log(socket.username+' user disconnected');
+      console.log('after namelist:'+namelist);
     }
   });
 
